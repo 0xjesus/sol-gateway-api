@@ -1,0 +1,33 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Invoice {
+  id            Int      @id @default(autoincrement())
+  amount        Float
+  walletAddress String
+  privateKey    String   @db.Text
+  status        String   @default("pending")
+  webhookUrl    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  cronJobId     Int?
+
+  CronJob CronJob[]
+}
+
+model CronJob {
+  id            Int      @id @default(autoincrement())
+  invoiceId     Int      @unique
+  processId     String
+  status        String   @default("pending")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  invoice       Invoice  @relation(fields: [invoiceId], references: [id])
+}
